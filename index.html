@@ -8,10 +8,7 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-
 <div class="container">
-
-  <!-- HERO -->
   <div class="hero">
     <div class="card hero-main">
       <div>
@@ -21,38 +18,28 @@
       </div>
       <button id="newNoteBtn">+ New Note</button>
     </div>
-
     <div class="card">
       <div class="mini-label">Notes</div>
       <div id="notesCount">0</div>
     </div>
-
     <div class="card">
       <div class="mini-label">Connections</div>
       <div id="connectionsCount">0</div>
     </div>
   </div>
-
-  <!-- MAIN -->
   <div class="main-grid">
-
-    <!-- LEFT -->
     <div>
       <div class="card">
         <input id="searchInput" placeholder="Search..."/>
       </div>
-
       <div class="card">
         <div id="notesList"></div>
       </div>
     </div>
-
-    <!-- CENTER -->
     <div>
       <div class="card">
         <svg id="graphSvg"></svg>
       </div>
-
       <div class="card editor" id="editorPanel">
         <input id="titleInput" placeholder="Title"/>
         <textarea id="contentInput"></textarea>
@@ -61,16 +48,11 @@
         <button id="cancelBtn">Cancel</button>
       </div>
     </div>
-
-    <!-- RIGHT -->
     <div>
       <div class="card" id="selectedNoteContent"></div>
     </div>
-
   </div>
-
 </div>
-
 <script src="script.js"></script>
 </body>
 </html>
