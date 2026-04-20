@@ -2,13 +2,10 @@
 let notes = [
   { id: 1, title: "AI", content: "Artificial Intelligence", links: [] }
 ];
-
 let selectedId = 1;
-
 const notesList = document.getElementById("notesList");
 const selectedNote = document.getElementById("selectedNoteContent");
 const graph = document.getElementById("graphSvg");
-
 function renderNotes() {
   notesList.innerHTML = "";
 
