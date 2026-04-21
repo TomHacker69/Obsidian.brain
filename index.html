@@ -1,58 +1,111 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Second Brain Knowledge Graph</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="container">
-  <div class="hero">
-    <div class="card hero-main">
-      <div>
-        <div class="mini-label">Second Brain</div>
+  <div class="container">
+    <header class="hero">
+      <div class="hero-left">
+        <p class="eyebrow">Second Brain</p>
         <h1>Knowledge Graph Workspace</h1>
-        <p>Connect ideas visually like a brain.</p>
+        <p class="hero-text">
+          Create notes, connect ideas, and explore relationships visually.
+        </p>
       </div>
-      <button id="newNoteBtn">+ New Note</button>
-    </div>
-    <div class="card">
-      <div class="mini-label">Notes</div>
-      <div id="notesCount">0</div>
-    </div>
-    <div class="card">
-      <div class="mini-label">Connections</div>
-      <div id="connectionsCount">0</div>
-    </div>
+      <div class="hero-actions">
+        <button id="newNoteBtn" class="primary-btn">+ New Note</button>
+      </div>
+    </header>
+
+    <section class="stats">
+      <div class="stat-card">
+        <span class="stat-label">Notes</span>
+        <strong id="notesCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Connections</span>
+        <strong id="connectionsCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Visible</span>
+        <strong id="visibleCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Tags</span>
+        <strong id="tagsCount">0</strong>
+      </div>
+    </section>
+
+    <main class="main-grid">
+      <aside class="panel">
+        <h2>Search Notes</h2>
+        <input id="searchInput" type="text" placeholder="Search title, content, tags..." />
+
+        <div class="section-head">
+          <h3>All Notes</h3>
+        </div>
+        <div id="notesList" class="notes-list"></div>
+      </aside>
+
+      <section class="panel center-panel">
+        <div class="graph-head">
+          <h2>Graph View</h2>
+          <button id="resetGraphBtn" class="ghost-btn">Reset View</button>
+        </div>
+        <div class="graph-wrapper">
+          <svg id="graphSvg" viewBox="0 0 900 520"></svg>
+        </div>
+
+        <div id="editorPanel" class="editor hidden">
+          <div class="editor-head">
+            <h3 id="editorTitle">Create Note</h3>
+          </div>
+
+          <label>Title</label>
+          <input id="titleInput" type="text" placeholder="Enter note title" />
+
+          <label>Content</label>
+          <textarea id="contentInput" placeholder="Write your note here..."></textarea>
+
+          <label>Tags</label>
+          <input id="tagsInput" type="text" placeholder="AI, Research, Ideas" />
+
+          <label>Connect Related Notes</label>
+          <div id="linkSelector" class="link-selector"></div>
+
+          <div class="editor-actions">
+            <button id="saveBtn" class="primary-btn">Save</button>
+            <button id="cancelBtn" class="ghost-btn">Cancel</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2>Selected Note</h2>
+        <div id="selectedNoteContent" class="selected-note-content"></div>
+
+        <div class="sub-panel">
+          <h3>Linked Notes</h3>
+          <div id="linkedNotes" class="mini-list"></div>
+        </div>
+
+        <div class="sub-panel">
+          <h3>Backlinks</h3>
+          <div id="backlinks" class="mini-list"></div>
+        </div>
+
+        <div class="sub-panel">
+          <h3>AI Suggestions</h3>
+          <div id="aiSuggestions" class="mini-list"></div>
+        </div>
+      </aside>
+    </main>
   </div>
-  <div class="main-grid">
-    <div>
-      <div class="card">
-        <input id="searchInput" placeholder="Search..."/>
-      </div>
-      <div class="card">
-        <div id="notesList"></div>
-      </div>
-    </div>
-    <div>
-      <div class="card">
-        <svg id="graphSvg"></svg>
-      </div>
-      <div class="card editor" id="editorPanel">
-        <input id="titleInput" placeholder="Title"/>
-        <textarea id="contentInput"></textarea>
-        <input id="tagsInput" placeholder="tags"/>
-        <button id="saveBtn">Save</button>
-        <button id="cancelBtn">Cancel</button>
-      </div>
-    </div>
-    <div>
-      <div class="card" id="selectedNoteContent"></div>
-    </div>
-  </div>
-</div>
-<script src="script.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>
