@@ -465,7 +465,13 @@ function saveCurrentNote() {
           title,
           content,
           tags,
-          links: selectedLinks.filter((id) => id !== editingId),
+         const wikiLinks = extractWikiLinks(content);
+
+const autoLinks = wikiLinks
+  .map(title => getNoteIdByTitle(title))
+  .filter(Boolean);
+
+const finalLinks = [...new Set([...selectedLinks, ...autoLinks])];,
           updatedAt: Date.now()
         };
       }
