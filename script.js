@@ -586,3 +586,11 @@ function getNoteIdByTitle(title) {
   return note ? note.id : null;
 }
 
+function renderContentWithLinks(content) {
+  return escapeHtml(content).replace(/\[\[(.*?)\]\]/g, (match, title) => {
+    const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
+    if (!note) return match;
+
+    return `<span class="wiki-link" onclick="selectNote('${note.id}')">${title}</span>`;
+  });
+}
