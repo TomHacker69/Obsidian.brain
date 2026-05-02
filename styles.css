@@ -328,4 +328,12 @@ textarea {
     align-items: flex-start;
   }
 }
+.wiki-link {
+  color: #3b82f6;
+  cursor: pointer;
+  font-weight: 500;
+}
 
+.wiki-link:hover {
+  text-decoration: underline;
+}
