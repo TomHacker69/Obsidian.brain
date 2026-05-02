@@ -232,7 +232,7 @@ function renderSelectedNote() {
     <div class="tags">
       ${note.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
     </div>
-    <div class="selected-text">${escapeHtml(note.content)}</div>
+    <div class="selected-text">${renderContentWithLinks(note.content)}</div>
     <div class="meta">
       Created: ${formatDate(note.createdAt)}<br>
       Updated: ${formatDate(note.updatedAt)}
@@ -457,6 +457,12 @@ function saveCurrentNote() {
     return;
   }
 
+  const wikiLinks = extractWikiLinks(content);
+  const autoLinks = wikiLinks
+    .map((title) => getNoteIdByTitle(title))
+    .filter(Boolean);
+  const finalLinks = [...new Set([...selectedLinks, ...autoLinks])];
+
   if (editingId) {
     notes = notes.map((note) => {
       if (note.id === editingId) {
@@ -465,13 +471,7 @@ function saveCurrentNote() {
           title,
           content,
           tags,
-         const wikiLinks = extractWikiLinks(content);
-
-const autoLinks = wikiLinks
-  .map(title => getNoteIdByTitle(title))
-  .filter(Boolean);
-
-const finalLinks = [...new Set([...selectedLinks, ...autoLinks])];,
+          links: finalLinks,
           updatedAt: Date.now()
         };
       }
@@ -485,7 +485,7 @@ const finalLinks = [...new Set([...selectedLinks, ...autoLinks])];,
       title,
       content,
       tags,
-      links: [...selectedLinks],
+      links: finalLinks,
       createdAt: Date.now(),
       updatedAt: Date.now()
     });
@@ -585,3 +585,4 @@ function getNoteIdByTitle(title) {
   const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
   return note ? note.id : null;
 }
+
