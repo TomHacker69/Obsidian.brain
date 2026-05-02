@@ -570,3 +570,12 @@ window.startEdit = startEdit;
 window.deleteNote = deleteNote;
 window.selectNote = selectNote;
 window.linkSuggestedNote = linkSuggestedNote;
+
+function extractWikiLinks(content) {
+  const matches = content.match(/\[\[(.*?)\]\]/g) || [];
+  return matches.map(link => link.replace(/\[\[|\]\]/g, "").trim());
+}
+function getNoteIdByTitle(title) {
+  const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
+  return note ? note.id : null;
+}
