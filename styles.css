@@ -328,3 +328,7 @@ textarea {
     align-items: flex-start;
   }
 }
+function extractWikiLinks(content) {
+  const matches = content.match(/\[\[(.*?)\]\]/g) || [];
+  return matches.map(link => link.replace(/\[\[|\]\]/g, "").trim());
+}
