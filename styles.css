@@ -344,3 +344,12 @@ textarea {
   margin-left: 20px;
   margin-bottom: 6px;
 }
+.wiki-link {
+  color: #3b82f6;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.wiki-link:hover {
+  text-decoration: underline;
+}
