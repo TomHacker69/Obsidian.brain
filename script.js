@@ -593,9 +593,11 @@ function renderContentWithLinks(content) {
 
     return `<span class="wiki-link" onclick="selectNote('${note.id}')">${title}</span>`;
   });
-}
-function renderMarkdown(content) {
-  return renderContentWithLinks(content)
+}function renderMarkdown(content) {
+  let html = content;
+
+  // Step 1: Convert markdown first
+  html = html
     .replace(/^### (.*$)/gim, "<h3>$1</h3>")
     .replace(/^## (.*$)/gim, "<h2>$1</h2>")
     .replace(/^# (.*$)/gim, "<h1>$1</h1>")
@@ -604,4 +606,14 @@ function renderMarkdown(content) {
     .replace(/`(.*?)`/gim, "<code>$1</code>")
     .replace(/^- (.*$)/gim, "<li>$1</li>")
     .replace(/\n/g, "<br>");
+
+  // Step 2: THEN apply wiki links
+  html = html.replace(/\[\[(.*?)\]\]/g, (match, title) => {
+    const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
+    if (!note) return match;
+
+    return `<span class="wiki-link" onclick="selectNote('${note.id}')">${title}</span>`;
+  });
+
+  return html;
 }
