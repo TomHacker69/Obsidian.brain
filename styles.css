@@ -328,12 +328,19 @@ textarea {
     align-items: flex-start;
   }
 }
-.wiki-link {
-  color: #3b82f6;
-  cursor: pointer;
-  font-weight: 500;
+.selected-text h1,
+.selected-text h2,
+.selected-text h3 {
+  margin: 14px 0 8px;
 }
 
-.wiki-link:hover {
-  text-decoration: underline;
+.selected-text code {
+  background: #eef2ff;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+
+.selected-text li {
+  margin-left: 20px;
+  margin-bottom: 6px;
 }
