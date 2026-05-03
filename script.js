@@ -232,7 +232,7 @@ function renderSelectedNote() {
     <div class="tags">
       ${note.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
     </div>
-    <div class="selected-text">${renderContentWithLinks(note.content)}</div>
+    <div class="selected-text">${renderMarkdown(note.content)}</div>
     <div class="meta">
       Created: ${formatDate(note.createdAt)}<br>
       Updated: ${formatDate(note.updatedAt)}
