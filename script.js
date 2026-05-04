@@ -1,10 +1,10 @@
-const STORAGE_KEY = "second-brain-advanced-v1";
+const STORAGE_KEY = "second-brain-advanced-v2";
 
 const starterNotes = [
   {
     id: "1",
     title: "Machine Learning",
-    content: "A field of AI focused on building systems that learn from data and improve through experience.",
+    content: "# Machine Learning\n\nA field of **AI** focused on building systems that learn from data and improve through experience.\n\nRelated to [[Neural Networks]] and [[Data Preprocessing]].",
     tags: ["AI", "Core"],
     links: ["2", "3"],
     createdAt: Date.now() - 100000,
@@ -13,7 +13,7 @@ const starterNotes = [
   {
     id: "2",
     title: "Neural Networks",
-    content: "A deep learning model inspired by the human brain and used in computer vision and NLP.",
+    content: "A deep learning model inspired by the human brain and used in computer vision and NLP.\n\nIt is connected to [[Machine Learning]].",
     tags: ["AI", "Deep Learning"],
     links: ["1", "3"],
     createdAt: Date.now() - 90000,
@@ -110,6 +110,16 @@ function escapeHtml(text) {
     .replace(/'/g, "&#39;");
 }
 
+function extractWikiLinks(content) {
+  const matches = content.match(/\[\[(.*?)\]\]/g) || [];
+  return matches.map((link) => link.replace(/\[\[|\]\]/g, "").trim());
+}
+
+function getNoteIdByTitle(title) {
+  const note = notes.find((n) => n.title.toLowerCase() === title.toLowerCase());
+  return note ? note.id : null;
+}
+
 function getFilteredNotes() {
   const query = searchText.trim().toLowerCase();
   if (!query) return notes;
@@ -118,6 +128,7 @@ function getFilteredNotes() {
     const combined = [note.title, note.content, ...(note.tags || [])]
       .join(" ")
       .toLowerCase();
+
     return combined.includes(query);
   });
 }
@@ -127,11 +138,11 @@ function getSelectedNote() {
 }
 
 function getUniqueTagsCount() {
-  return new Set(notes.flatMap((note) => note.tags)).size;
+  return new Set(notes.flatMap((note) => note.tags || [])).size;
 }
 
 function getConnectionsCount() {
-  return notes.reduce((sum, note) => sum + note.links.length, 0);
+  return notes.reduce((sum, note) => sum + (note.links || []).length, 0);
 }
 
 function tokenize(text) {
@@ -142,33 +153,58 @@ function tokenize(text) {
     .filter((word) => word.length > 2);
 }
 
+function renderMarkdown(content) {
+  let html = escapeHtml(content);
+
+  html = html
+    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+    .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/gim, "<em>$1</em>")
+    .replace(/`(.*?)`/gim, "<code>$1</code>")
+    .replace(/^- (.*$)/gim, "<li>$1</li>");
+
+  html = html.replace(/\[\[(.*?)\]\]/g, (match, title) => {
+    const cleanTitle = title.trim();
+    const note = notes.find((n) => n.title.toLowerCase() === cleanTitle.toLowerCase());
+
+    if (!note) return `<span class="wiki-link missing">${cleanTitle}</span>`;
+
+    return `<span class="wiki-link" onclick="selectNote('${note.id}')">${escapeHtml(cleanTitle)}</span>`;
+  });
+
+  return html.replace(/\n/g, "<br>");
+}
+
 function getAISuggestions(note) {
   if (!note) return [];
 
   const currentWords = new Set([
     ...tokenize(note.title),
     ...tokenize(note.content),
-    ...note.tags.map((tag) => tag.toLowerCase())
+    ...(note.tags || []).map((tag) => tag.toLowerCase())
   ]);
 
-  const linkedSet = new Set(note.links);
+  const linkedSet = new Set(note.links || []);
 
-  const scored = notes
+  return notes
     .filter((n) => n.id !== note.id && !linkedSet.has(n.id))
     .map((candidate) => {
       const candidateWords = new Set([
         ...tokenize(candidate.title),
         ...tokenize(candidate.content),
-        ...candidate.tags.map((tag) => tag.toLowerCase())
+        ...(candidate.tags || []).map((tag) => tag.toLowerCase())
       ]);
 
       let score = 0;
+
       currentWords.forEach((word) => {
         if (candidateWords.has(word)) score += 1;
       });
 
-      const sharedTags = note.tags.filter((tag) =>
-        candidate.tags.map((t) => t.toLowerCase()).includes(tag.toLowerCase())
+      const sharedTags = (note.tags || []).filter((tag) =>
+        (candidate.tags || []).map((t) => t.toLowerCase()).includes(tag.toLowerCase())
       ).length;
 
       score += sharedTags * 2;
@@ -178,8 +214,6 @@ function getAISuggestions(note) {
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
-
-  return scored;
 }
 
 function renderStats() {
@@ -201,17 +235,20 @@ function renderNotesList() {
   filteredNotes.forEach((note) => {
     const div = document.createElement("div");
     div.className = "note-card" + (note.id === selectedId ? " active" : "");
+
     div.innerHTML = `
       <div class="note-card-title">${escapeHtml(note.title)}</div>
-      <div class="note-card-text">${escapeHtml(truncate(note.content))}</div>
+      <div class="note-card-text">${escapeHtml(truncate(note.content.replaceAll("\n", " ")))}</div>
       <div class="tags">
-        ${note.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+        ${(note.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
       </div>
     `;
+
     div.onclick = () => {
       selectedId = note.id;
       renderApp();
     };
+
     notesList.appendChild(div);
   });
 }
@@ -230,7 +267,7 @@ function renderSelectedNote() {
   selectedNoteContent.innerHTML = `
     <div class="selected-title">${escapeHtml(note.title)}</div>
     <div class="tags">
-      ${note.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+      ${(note.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
     </div>
     <div class="selected-text">${renderMarkdown(note.content)}</div>
     <div class="meta">
@@ -243,15 +280,15 @@ function renderSelectedNote() {
     </div>
   `;
 
-  const outgoing = notes.filter((n) => note.links.includes(n.id));
-  const incoming = notes.filter((n) => n.links.includes(note.id));
+  const outgoing = notes.filter((n) => (note.links || []).includes(n.id));
+  const incoming = notes.filter((n) => (n.links || []).includes(note.id));
   const suggestions = getAISuggestions(note);
 
   linkedNotes.innerHTML = outgoing.length
     ? outgoing.map((n) => `
       <div class="mini-card" onclick="selectNote('${n.id}')">
         <div class="note-card-title">${escapeHtml(n.title)}</div>
-        <div class="mini-muted">${escapeHtml(truncate(n.content, 60))}</div>
+        <div class="mini-muted">${escapeHtml(truncate(n.content.replaceAll("\n", " "), 60))}</div>
       </div>
     `).join("")
     : '<div class="empty">No outgoing links.</div>';
@@ -269,7 +306,7 @@ function renderSelectedNote() {
     ? suggestions.map((n) => `
       <div class="mini-card" onclick="linkSuggestedNote('${n.id}')">
         <div class="note-card-title">${escapeHtml(n.title)}</div>
-        <div class="mini-muted">${escapeHtml(truncate(n.content, 55))}</div>
+        <div class="mini-muted">${escapeHtml(truncate(n.content.replaceAll("\n", " "), 55))}</div>
         <div class="suggestion-score">Match score: ${n.score} · click to link</div>
       </div>
     `).join("")
@@ -278,6 +315,7 @@ function renderSelectedNote() {
 
 function renderLinkSelector() {
   linkSelector.innerHTML = "";
+
   const availableNotes = notes.filter((note) => note.id !== editingId);
 
   if (!availableNotes.length) {
@@ -288,9 +326,10 @@ function renderLinkSelector() {
   availableNotes.forEach((note) => {
     const div = document.createElement("div");
     div.className = "link-option" + (selectedLinks.includes(note.id) ? " selected" : "");
+
     div.innerHTML = `
       <div class="note-card-title">${escapeHtml(note.title)}</div>
-      <div class="mini-muted">${escapeHtml(note.tags.join(", "))}</div>
+      <div class="mini-muted">${escapeHtml((note.tags || []).join(", "))}</div>
     `;
 
     div.onclick = () => {
@@ -299,6 +338,7 @@ function renderLinkSelector() {
       } else {
         selectedLinks.push(note.id);
       }
+
       renderLinkSelector();
     };
 
@@ -315,6 +355,7 @@ function getGraphPositions(filteredNotes, width, height) {
   filteredNotes.forEach((note, index) => {
     const angle = (Math.PI * 2 * index) / Math.max(filteredNotes.length, 1) - Math.PI / 2;
     const wobble = 28 * Math.sin(index * 1.6);
+
     positions[note.id] = {
       x: centerX + (radius + wobble) * Math.cos(angle),
       y: centerY + (radius - wobble / 2) * Math.sin(angle)
@@ -334,9 +375,10 @@ function renderGraph() {
   let svgContent = `
     <defs>
       <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
-        <stop offset="0%" stop-color="rgba(255,255,255,0.12)"></stop>
+        <stop offset="0%" stop-color="rgba(255,255,255,0.16)"></stop>
         <stop offset="100%" stop-color="rgba(255,255,255,0)"></stop>
       </radialGradient>
+
       <filter id="softGlow">
         <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
         <feMerge>
@@ -345,21 +387,23 @@ function renderGraph() {
         </feMerge>
       </filter>
     </defs>
-    <circle cx="${width / 2}" cy="${height / 2}" r="150" fill="url(#bgGlow)"></circle>
+
+    <circle cx="${width / 2}" cy="${height / 2}" r="170" fill="url(#bgGlow)"></circle>
   `;
 
   filteredNotes.forEach((note) => {
-    note.links.forEach((targetId) => {
+    (note.links || []).forEach((targetId) => {
       if (filteredIds.has(targetId) && positions[note.id] && positions[targetId]) {
         const active = selectedId === note.id || selectedId === targetId;
+
         svgContent += `
           <line
             x1="${positions[note.id].x}"
             y1="${positions[note.id].y}"
             x2="${positions[targetId].x}"
             y2="${positions[targetId].y}"
-            stroke="${active ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.20)"}"
-            stroke-width="${active ? "2.4" : "1.2"}"
+            stroke="${active ? "rgba(147,197,253,0.95)" : "rgba(255,255,255,0.20)"}"
+            stroke-width="${active ? "2.7" : "1.2"}"
           ></line>
         `;
       }
@@ -368,7 +412,7 @@ function renderGraph() {
 
   filteredNotes.forEach((note, index) => {
     const pos = positions[note.id];
-    const degree = note.links.filter((id) => filteredIds.has(id)).length;
+    const degree = (note.links || []).filter((id) => filteredIds.has(id)).length;
     const nodeRadius = degree >= 5 ? 30 : degree >= 3 ? 26 : degree >= 1 ? 22 : 18;
     const isActive = selectedId === note.id;
     const label = note.title.length > 14 ? note.title.slice(0, 14) + "…" : note.title;
@@ -380,9 +424,9 @@ function renderGraph() {
           cx="${pos.x}"
           cy="${pos.y}"
           r="${isActive ? nodeRadius + 8 : nodeRadius}"
-          fill="${isActive ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)"}"
-          stroke="${isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.38)"}"
-          stroke-width="${isActive ? "2.6" : "1.2"}"
+          fill="${isActive ? "rgba(96,165,250,0.22)" : "rgba(255,255,255,0.08)"}"
+          stroke="${isActive ? "rgba(147,197,253,1)" : "rgba(255,255,255,0.42)"}"
+          stroke-width="${isActive ? "2.8" : "1.2"}"
           filter="url(#softGlow)"
         >
           <animate
@@ -393,12 +437,13 @@ function renderGraph() {
             repeatCount="indefinite"
           />
         </circle>
+
         <text
           x="${pos.x}"
           y="${pos.y + 4}"
           fill="white"
           font-size="${isActive ? 13 : 11}"
-          font-weight="${isActive ? 700 : 500}"
+          font-weight="${isActive ? 800 : 600}"
           text-anchor="middle"
         >${escapeHtml(label)}</text>
       </g>
@@ -437,16 +482,17 @@ function startEdit() {
   if (!note) return;
 
   editingId = note.id;
-  selectedLinks = [...note.links];
+  selectedLinks = [...(note.links || [])];
   titleInput.value = note.title;
   contentInput.value = note.content;
-  tagsInput.value = note.tags.join(", ");
+  tagsInput.value = (note.tags || []).join(", ");
   showEditor(false);
 }
 
 function saveCurrentNote() {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
+
   const tags = tagsInput.value
     .split(",")
     .map((tag) => tag.trim())
@@ -458,9 +504,11 @@ function saveCurrentNote() {
   }
 
   const wikiLinks = extractWikiLinks(content);
+
   const autoLinks = wikiLinks
     .map((title) => getNoteIdByTitle(title))
     .filter(Boolean);
+
   const finalLinks = [...new Set([...selectedLinks, ...autoLinks])];
 
   if (editingId) {
@@ -471,24 +519,28 @@ function saveCurrentNote() {
           title,
           content,
           tags,
-          links: finalLinks,
+          links: finalLinks.filter((id) => id !== editingId),
           updatedAt: Date.now()
         };
       }
+
       return note;
     });
+
     selectedId = editingId;
   } else {
     const id = uid();
+
     notes.unshift({
       id,
       title,
       content,
       tags,
-      links: finalLinks,
+      links: finalLinks.filter((linkId) => linkId !== id),
       createdAt: Date.now(),
       updatedAt: Date.now()
     });
+
     selectedId = id;
   }
 
@@ -501,14 +553,18 @@ function deleteNote() {
   const note = getSelectedNote();
   if (!note) return;
 
+  const confirmDelete = confirm(`Delete "${note.title}"?`);
+  if (!confirmDelete) return;
+
   notes = notes
     .filter((n) => n.id !== note.id)
     .map((n) => ({
       ...n,
-      links: n.links.filter((id) => id !== note.id)
+      links: (n.links || []).filter((id) => id !== note.id)
     }));
 
   selectedId = notes[0] ? notes[0].id : null;
+
   saveNotes();
   renderApp();
 }
@@ -523,13 +579,14 @@ function linkSuggestedNote(id) {
   if (!note) return;
 
   notes = notes.map((n) => {
-    if (n.id === note.id && !n.links.includes(id)) {
+    if (n.id === note.id && !(n.links || []).includes(id)) {
       return {
         ...n,
-        links: [...n.links, id],
+        links: [...(n.links || []), id],
         updatedAt: Date.now()
       };
     }
+
     return n;
   });
 
@@ -545,7 +602,7 @@ function renderApp() {
   const filteredNotes = getFilteredNotes();
 
   if (!filteredNotes.find((note) => note.id === selectedId)) {
-    selectedId = filteredNotes[0] ? filteredNotes[0].id : (notes[0] ? notes[0].id : null);
+    selectedId = filteredNotes[0] ? filteredNotes[0].id : notes[0] ? notes[0].id : null;
   }
 
   renderStats();
@@ -576,44 +633,3 @@ window.startEdit = startEdit;
 window.deleteNote = deleteNote;
 window.selectNote = selectNote;
 window.linkSuggestedNote = linkSuggestedNote;
-
-function extractWikiLinks(content) {
-  const matches = content.match(/\[\[(.*?)\]\]/g) || [];
-  return matches.map(link => link.replace(/\[\[|\]\]/g, "").trim());
-}
-function getNoteIdByTitle(title) {
-  const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
-  return note ? note.id : null;
-}
-
-function renderContentWithLinks(content) {
-  return escapeHtml(content).replace(/\[\[(.*?)\]\]/g, (match, title) => {
-    const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
-    if (!note) return match;
-
-    return `<span class="wiki-link" onclick="selectNote('${note.id}')">${title}</span>`;
-  });
-}function renderMarkdown(content) {
-  let html = content;
-
-  // Step 1: Convert markdown first
-  html = html
-    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-    .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
-    .replace(/\*(.*?)\*/gim, "<em>$1</em>")
-    .replace(/`(.*?)`/gim, "<code>$1</code>")
-    .replace(/^- (.*$)/gim, "<li>$1</li>")
-    .replace(/\n/g, "<br>");
-
-  // Step 2: THEN apply wiki links
-  html = html.replace(/\[\[(.*?)\]\]/g, (match, title) => {
-    const note = notes.find(n => n.title.toLowerCase() === title.toLowerCase());
-    if (!note) return match;
-
-    return `<span class="wiki-link" onclick="selectNote('${note.id}')">${title}</span>`;
-  });
-
-  return html;
-}
