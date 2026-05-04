@@ -3,19 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Second Brain Knowledge Graph</title>
+  <title>Obsidian.brain | Knowledge Graph Workspace</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div id="vanta-bg" class="app-bg"></div>
+
   <div class="container">
     <header class="hero">
       <div class="hero-left">
-        <p class="eyebrow">Second Brain</p>
+        <p class="eyebrow">Obsidian.brain</p>
         <h1>Knowledge Graph Workspace</h1>
         <p class="hero-text">
-          Create notes, connect ideas, and explore relationships visually.
+          Capture notes, connect ideas, discover backlinks, and explore your thoughts visually.
         </p>
       </div>
+
       <div class="hero-actions">
         <button id="newNoteBtn" class="primary-btn">+ New Note</button>
       </div>
@@ -41,21 +49,26 @@
     </section>
 
     <main class="main-grid">
-      <aside class="panel">
+      <aside class="panel sidebar-panel">
         <h2>Search Notes</h2>
         <input id="searchInput" type="text" placeholder="Search title, content, tags..." />
 
         <div class="section-head">
           <h3>All Notes</h3>
         </div>
+
         <div id="notesList" class="notes-list"></div>
       </aside>
 
       <section class="panel center-panel">
         <div class="graph-head">
-          <h2>Graph View</h2>
+          <div>
+            <h2>Graph View</h2>
+            <p class="panel-subtitle">Visual map of connected ideas</p>
+          </div>
           <button id="resetGraphBtn" class="ghost-btn">Reset View</button>
         </div>
+
         <div class="graph-wrapper">
           <svg id="graphSvg" viewBox="0 0 900 520"></svg>
         </div>
@@ -69,7 +82,7 @@
           <input id="titleInput" type="text" placeholder="Enter note title" />
 
           <label>Content</label>
-          <textarea id="contentInput" placeholder="Write your note here..."></textarea>
+          <textarea id="contentInput" placeholder="Write markdown here... Use [[Note Title]] to link notes."></textarea>
 
           <label>Tags</label>
           <input id="tagsInput" type="text" placeholder="AI, Research, Ideas" />
@@ -78,13 +91,13 @@
           <div id="linkSelector" class="link-selector"></div>
 
           <div class="editor-actions">
-            <button id="saveBtn" class="primary-btn">Save</button>
+            <button id="saveBtn" class="primary-btn">Save Note</button>
             <button id="cancelBtn" class="ghost-btn">Cancel</button>
           </div>
         </div>
       </section>
 
-      <aside class="panel">
+      <aside class="panel details-panel">
         <h2>Selected Note</h2>
         <div id="selectedNoteContent" class="selected-note-content"></div>
 
@@ -106,6 +119,27 @@
     </main>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.21/vanta.net.min.js"></script>
+  <script>
+  VANTA.NET({
+    el: "#vanta-bg",
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    backgroundColor: 0x050912,
+    color: 0x8b5cf6,
+    points: 20,
+    maxDistance: 24.00,
+    spacing: 18.00,
+    showDots: false,
+    backgroundAlpha: 0.96
+  })
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
